@@ -1,0 +1,49 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: webapp-deployment-qa
+  namespace: ns-webapp-qa
+  labels:
+    app: webapp-deployment-qa
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: webapp-deployment-qa
+  template:
+    metadata:
+      labels:
+        app: webapp-deployment-qa
+    spec:
+      containers:
+      - name: webapp-deployment-qa
+        image: crwebapp001teste.azurecr.io/webappgithub:2e1748ee96ca9147a48352bd1b5fe2aca969eabe
+        ports:
+        - containerPort: 80
+          protocol: TCP
+        env:
+        - name: ConnectionStrings__DefaultConnection
+          valueFrom:
+            configMapKeyRef:
+              name: configmap-webapp-qa
+              key: ConnectionStrings.DefaultConnection
+        - name: Keycloak__Audience
+          valueFrom:
+            configMapKeyRef:
+              name: configmap-webapp-qa
+              key: Keycloak.Audience
+        - name: Keycloak__Authority
+          valueFrom:
+            configMapKeyRef:
+              name: configmap-webapp-qa
+              key: Keycloak.Authority
+        - name: Keycloak__ClientSecret
+          valueFrom:
+            configMapKeyRef:
+              name: configmap-webapp-qa
+              key: Keycloak.ClientSecret
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
